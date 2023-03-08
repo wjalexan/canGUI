@@ -5,6 +5,21 @@
 #include <iostream>
 #include <fstream>
 
+
+int checkType(char input) {
+    int status = -1;
+    char set[] = { '1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','a','b','c','d','e','f',' '};
+    for (int i = 1; i < sizeof(set); i++) {
+        if (input == set[i] && status == -1) {
+            status = 0;
+        }
+        else if (input == '>' && status == -1) {
+            std::cout << std::endl;
+        }
+    }
+    return status;
+}
+
 int main()
 {
     // Define variables
@@ -61,10 +76,16 @@ int main()
         if (dwBytesRead > 0)
         {
             szBuff[dwBytesRead] = '\0'; // Add null terminator
+            
+            for (int i = 0; i < 255; i++) {
+                if (checkType(char(szBuff[i])) == 0) {
+                    std::cout << szBuff[i];
+                }
+            }
 
-            std::cout << szBuff; // Print data
-            log << szBuff; // write to file
-            log.flush();
+            //std::cout << szBuff; // Print data
+            //log << szBuff; // write to file
+            //log.flush();
 
             memset(szBuff, '\0', sizeof(szBuff)); // Clear buffer
 
@@ -77,3 +98,5 @@ int main()
 
     return 0;
 }
+
+

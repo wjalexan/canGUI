@@ -1,0 +1,9 @@
+namespace serialPrint
+{
+    [default_interface]
+    runtimeclass serialWrite_h : Windows.UI.Xaml.Controls.Page
+    {
+        serialWrite_h();
+        Int32 MyProperty;
+    }
+}
