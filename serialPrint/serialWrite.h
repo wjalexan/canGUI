@@ -50,6 +50,7 @@ int serialWrite(LPCWSTR port, std::string message) { // serialWrite command; eg 
         CloseHandle(arduino);
         return -1;
     }
+    CloseHandle(arduino);
 
 }
 

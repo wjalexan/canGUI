@@ -21,13 +21,13 @@ int checkType(char input) {
 
 int serialRead(LPCWSTR port) {
     // Define variables
-    HANDLE hSerial; // Handle for serial port
+    // HANDLE hSerial; // Handle for serial port
     DCB dcbSerialParams = { 0 }; // Structure for serial port parameters
     DWORD dwBytesRead = 0; // Number of bytes read from serial port
     char szBuff[256] = { 0 }; // Buffer for data from serial port
 
     // Open serial port
-    hSerial = CreateFile((L"COM3"), GENERIC_READ | GENERIC_WRITE,
+    HANDLE hSerial = CreateFile((L"COM3"), GENERIC_READ | GENERIC_WRITE,
         0,
         NULL,
         OPEN_EXISTING,
