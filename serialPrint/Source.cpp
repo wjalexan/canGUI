@@ -7,8 +7,8 @@
 #include "serialWrite.h"
 
 int main() {
-	serialWrite(L"COM3", "S");
+	//serialWrite(L"COM4", "S");
 	//std::this_thread::sleep_for(std::chrono::seconds(10)); // pause operation for 1 second
-	serialRead(L"COM3");
+	serialRead(L"COM4");
 	return 0;
 }
