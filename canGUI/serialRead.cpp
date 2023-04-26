@@ -7,21 +7,7 @@
 #include "ui_mainwindow.h"
 
 
-/*
-int checkType(char input) {
-    int status = -1;
-    char set[] = { '1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','a','b','c','d','e','f',' ' };
-    for (int i = 1; i < sizeof(set); i++) {
-        if (input == set[i] && status == -1) {
-            status = 0;
-        }
-        else if (input == '>' && status == -1) {
-            std::cout << std::endl;
-        }
-    }
-    return status;
-}
-*/
+
 
 int MainWindow::serialRead(LPCWSTR port) {
     // Define variables
@@ -66,9 +52,8 @@ int MainWindow::serialRead(LPCWSTR port) {
         ui->label->setText("Error getting serial port state");
         return 1;
     }
-    ui->label->setText("Connected!");
-    /*while (1)
-    {*/
+    //ui->label->setText("Connected!");
+
     // Read data from serial port
     if (!ReadFile(hSerial, szBuff, sizeof(szBuff) - 1, &dwBytesRead, NULL))
     {
@@ -108,8 +93,8 @@ int MainWindow::serialRead(LPCWSTR port) {
                     if (IDlen(szBuff, i) != -1){
                         ui->label->setText(ui->label->text() + " " + QString::number(i) + "," + QString(szBuff[i+1]));
 
-                        for (int j = 0; j < IDlen(szBuff, i)-1; j++){
-                            id += szBuff[j+1]; // set 'id' variable to packet id
+                        for (int j = 1; j < IDlen(szBuff, i); j++){
+                            id += szBuff[j+i]; // set 'id' variable to packet id
                         }
 
                         for (int j = 0; j < 2; j++){
