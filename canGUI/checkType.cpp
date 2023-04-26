@@ -8,7 +8,7 @@
 char MainWindow::checkChar(char inpt){
     switch (inpt){
     case '^':
-        return 's'; // searches for starting character
+        return 'b'; // searches for starting character
         break;
 
     case '*':
@@ -33,6 +33,8 @@ int MainWindow::IDlen(std::string can, int start){
     for (int i = 1; i < 255-start; i++){
         if (checkChar(can[start + i]) == 's'){
             return i;
+            break;
         }
     }
+    return -1;
 }

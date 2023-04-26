@@ -1,6 +1,8 @@
 #include <iostream>
 #include <Windows.h>
 #include <string>
+#include <sstream>
+#include <iomanip>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -86,47 +88,67 @@ int MainWindow::serialRead(LPCWSTR port) {
         //    }
         //}
 
+        int position; // variable storing the current position when decoding CAN messages
+        ui->label->clear();
 
-        for (int i = 0; i < 255; i++){
-            if (checkChar(szBuff[i]) == 's'){
-                std::string id;
-                std::string rtr;
-                std::string ide;
-                std::string dlc; // dlc denotes no. of bytes in data section
-                std::string data; // data bits
-                int dataPos; // position of data bits in array
-                int dataLen; // length of data (dlc)
-                //ui->label->setText(QString::number(IDlen(szBuff, i)));
-                //ui->label->setText(QString::number(i));
-                ui->tableWidget->insertRow(0); // new row in table
-                //ui->tableWidget->setItem(0,0, new QTableWidgetItem(szBuff.substr(i, IDlen(szBuff,i)))));
+        for(int x = 0; x < 255-x; x++){
+            for (int i = 0 + x; i < 255; i++){
+                if (checkChar(szBuff[i]) == 'b'){
+                    std::string id; // packet id
+                    std::string rtr; // remote transmission request: denotes whether data is requested
+                    std::string ide; // denotes whether an extension is being transmitted
+                    std::string dlc; // dlc denotes no. of bytes in data section
+                    std::string data; // data bits
+                    int dataPos; // position of data bits in array
+                    int dataLen; // length of data (dlc)
 
-                for (int j = 0; j < IDlen(szBuff, i)-1; j++){
-                    id += szBuff[j+1]; // set 'id' variable to packet id
-                }
 
-                for (int j = 0; j < 2; j++){
-                    rtr += szBuff[j+i+IDlen(szBuff, i)+1]; // set 'rtr' variable to packet rtr
-                    ide += szBuff[j+i+IDlen(szBuff, i)+4]; // set 'ide' variable to packet ide
-                }
+                    ui->tableWidget->insertRow(0); // new row in table
 
-                dataPos = i+IDlen(szBuff, i)+7;
-                data = szBuff[dataPos];
-                for (int j = 0; j < 16; j++){
-                    if (checkChar(szBuff[dataPos+j]) == 'e'){
-                        dataLen = j;
+                    if (IDlen(szBuff, i) != -1){
+                        ui->label->setText(ui->label->text() + " " + QString::number(i) + "," + QString(szBuff[i+1]));
+
+                        for (int j = 0; j < IDlen(szBuff, i)-1; j++){
+                            id += szBuff[j+1]; // set 'id' variable to packet id
+                        }
+
+                        for (int j = 0; j < 2; j++){
+                            rtr += szBuff[j+i+IDlen(szBuff, i)+1]; // set 'rtr' variable to packet rtr
+                            ide += szBuff[j+i+IDlen(szBuff, i)+4]; // set 'ide' variable to packet ide
+                        }
+
+                        dataPos = i+IDlen(szBuff, i)+7;
+                        //ui->label->setText(QString::number(i+IDlen(szBuff,i)));
+                        //data = szBuff[dataPos];
+                        for (int j = 0; j < 16; j++){
+                            if (checkChar(szBuff[dataPos+j]) == 'f'){
+                                dataLen = j;
+                                break;
+                            }
+                        }
+
+                        for (int j = 0; j < dataLen; j++){
+                            data += szBuff[j+dataPos]; // set 'id' variable to packet id
+                        }
+
+                        // convert length integer value to hexadecimal before adding to table
+                        std::stringstream len;
+                        len << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << dataLen/2;
+                        dlc = len.str();
+
+
+                        ui->tableWidget->setItem(0,0, new QTableWidgetItem(id.c_str())); // print id in table
+                        ui->tableWidget->setItem(0,1, new QTableWidgetItem(rtr.c_str())); // print rtr in table
+                        ui->tableWidget->setItem(0,2, new QTableWidgetItem(ide.c_str())); // print ide in table
+                        ui->tableWidget->setItem(0,3, new QTableWidgetItem(dlc.c_str())); // print dlc in table
+                        ui->tableWidget->setItem(0,4, new QTableWidgetItem(data.c_str())); // print data in table
+                        position = dataLen + dataPos;
+                        //ui->label->setText(ui->label->text() + " " + QString::number(dataLen) + "," + QString::number(dataPos));
+                        break;
                     }
                 }
-                ui->label->setText(QString::number(i));
-
-
-                ui->tableWidget->setItem(0,0, new QTableWidgetItem(id.c_str())); // print id in table
-                ui->tableWidget->setItem(0,1, new QTableWidgetItem(rtr.c_str())); // print rtr in table
-                ui->tableWidget->setItem(0,2, new QTableWidgetItem(ide.c_str())); // print ide in table
-                ui->tableWidget->setItem(0,3, new QTableWidgetItem(dlc.c_str())); // print ide in table
-                ui->tableWidget->setItem(0,4, new QTableWidgetItem(data.c_str())); // print data in table
-                break;
             }
+        x = position;
         }
 
 
