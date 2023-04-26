@@ -38,3 +38,13 @@ int MainWindow::IDlen(std::string can, int start){
     }
     return -1;
 }
+
+
+int MainWindow::findEnd(char data[255]){
+    for (int j = 255; j > 0; j--){
+        if (checkChar(data[j]) == 'f'){
+            return j;
+            break;
+        }
+    }
+}

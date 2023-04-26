@@ -74,9 +74,10 @@ int MainWindow::serialRead(LPCWSTR port) {
         //}
 
         int position; // variable storing the current position when decoding CAN messages
+        int end = findEnd(szBuff); // variable indicating the last complete packet
         ui->label->clear();
 
-        for(int x = 0; x < 255-x; x++){
+        for(int x = 0; x < end-1; x++){
             for (int i = 0 + x; i < 255; i++){
                 if (checkChar(szBuff[i]) == 'b'){
                     std::string id; // packet id
@@ -91,7 +92,6 @@ int MainWindow::serialRead(LPCWSTR port) {
                     ui->tableWidget->insertRow(0); // new row in table
 
                     if (IDlen(szBuff, i) != -1){
-                        ui->label->setText(ui->label->text() + " " + QString::number(i) + "," + QString(szBuff[i+1]));
 
                         for (int j = 1; j < IDlen(szBuff, i); j++){
                             id += szBuff[j+i]; // set 'id' variable to packet id
@@ -127,8 +127,8 @@ int MainWindow::serialRead(LPCWSTR port) {
                         ui->tableWidget->setItem(0,2, new QTableWidgetItem(ide.c_str())); // print ide in table
                         ui->tableWidget->setItem(0,3, new QTableWidgetItem(dlc.c_str())); // print dlc in table
                         ui->tableWidget->setItem(0,4, new QTableWidgetItem(data.c_str())); // print data in table
+
                         position = dataLen + dataPos;
-                        //ui->label->setText(ui->label->text() + " " + QString::number(dataLen) + "," + QString::number(dataPos));
                         break;
                     }
                 }
@@ -137,14 +137,6 @@ int MainWindow::serialRead(LPCWSTR port) {
         }
 
 
-        //ui->label->setText(QString(checkChar(szBuff[0])));
-        //if (checkChar(szBuff[0]) == 's'){
-        //    //ui->label->setText(QString::number(IDlen(szBuff, 0)));
-        //    ui->label->setText("du");
-        //}
-
-
-        //ui->label->setText("Connected!");
         ui->tableWidget->insertRow(0);
         ui->tableWidget->setItem(0,0, new QTableWidgetItem(szBuff));
 

@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->tableWidget->verticalHeader()->setVisible(false);// removes default number column4
     ui->pauseButton->setText("Start Recording");
+    ui->label->setText("Not Connected");
 
 }
 
@@ -30,11 +31,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_connectButton_clicked()
 {
-    ui->label->setText(ui->portSelect->text());
-    //ui->tableWidget->insertRow(0);
-    //ui->tableWidget->setItem(0,0, new QTableWidgetItem(ui->portSelect->text()));
-    QString pt = ui->portSelect->text();
+    ui->label->setText("Connecting...");
 
+    QString pt = ui->portSelect->text();
     LPCWSTR port = reinterpret_cast<LPCWSTR>(pt.constData()); // convert QString input to lpwstr requirement
     serialSetup(port);
 

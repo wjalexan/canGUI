@@ -25,9 +25,12 @@ private slots:
 
     char checkChar(char inpt);
 
+    int findEnd(char data[255]);
+
     int IDlen(std::string can, int start);
 
     void on_pauseButton_clicked();
+
 
 private:
     Ui::MainWindow *ui;
