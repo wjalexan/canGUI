@@ -84,7 +84,7 @@ int MainWindow::serialRead(LPCWSTR port) {
                     std::string rtr; // remote transmission request: denotes whether data is requested
                     std::string ide; // denotes whether an extension is being transmitted
                     std::string dlc; // dlc denotes no. of bytes in data section
-                    std::string data; // data bits
+                    std::string data[8]; // data bits
                     int dataPos; // position of data bits in array
                     int dataLen; // length of data (dlc)
 
@@ -112,8 +112,11 @@ int MainWindow::serialRead(LPCWSTR port) {
                             }
                         }
 
-                        for (int j = 0; j < dataLen; j++){
-                            data += szBuff[j+dataPos]; // set 'id' variable to packet id
+
+                        for (int j = 0; j < dataLen/2; j++){
+                            for (int k = 0; k < 2; k++){
+                                data[j] += szBuff[2*j+dataPos+k]; // set 'id' variable to packet id
+                            }
                         }
 
                         // convert length integer value to hexadecimal before adding to table
@@ -126,7 +129,9 @@ int MainWindow::serialRead(LPCWSTR port) {
                         ui->tableWidget->setItem(0,1, new QTableWidgetItem(rtr.c_str())); // print rtr in table
                         ui->tableWidget->setItem(0,2, new QTableWidgetItem(ide.c_str())); // print ide in table
                         ui->tableWidget->setItem(0,3, new QTableWidgetItem(dlc.c_str())); // print dlc in table
-                        ui->tableWidget->setItem(0,4, new QTableWidgetItem(data.c_str())); // print data in table
+                        for (int j = 0; j < dataLen/2; j++){
+                            ui->tableWidget->setItem(0,4+j, new QTableWidgetItem(data[j].c_str())); // print data in table
+                        }
 
                         position = dataLen + dataPos;
                         break;
