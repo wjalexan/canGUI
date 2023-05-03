@@ -15,9 +15,16 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    bool playing = false;
 
 private slots:
     void on_connectButton_clicked();
+
+    void on_pauseButton_clicked();
+
+
+private:
+    Ui::MainWindow *ui;
 
     int serialRead(LPCWSTR port);
 
@@ -29,10 +36,5 @@ private slots:
 
     int IDlen(std::string can, int start);
 
-    void on_pauseButton_clicked();
-
-
-private:
-    Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

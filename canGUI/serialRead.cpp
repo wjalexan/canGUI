@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include <iomanip>
+#include <QThread>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -10,6 +11,10 @@
 
 
 int MainWindow::serialRead(LPCWSTR port) {
+    playing = false;
+    QThread *thread = QThread::create([&]{
+        while(playing == false)
+            ui->connectButton->setText("test");
     // Define variables
     // HANDLE hSerial; // Handle for serial port
     DCB dcbSerialParams = { 0 }; // Structure for serial port parameters
@@ -54,6 +59,7 @@ int MainWindow::serialRead(LPCWSTR port) {
     }
     //ui->label->setText("Connected!");
 
+
     // Read data from serial port
     if (!ReadFile(hSerial, szBuff, sizeof(szBuff) - 1, &dwBytesRead, NULL))
     {
@@ -67,7 +73,7 @@ int MainWindow::serialRead(LPCWSTR port) {
     {
         szBuff[dwBytesRead] = '\0'; // Add null terminator
 
-        //for (int i = 0; i < 255; i++) {
+        //for (int i = 0; i < 255; i++) {q
         //    if (checkType(char(szBuff[i])) == 0) {
         //        std::cout << szBuff[i];
         //    }
@@ -146,14 +152,18 @@ int MainWindow::serialRead(LPCWSTR port) {
         ui->tableWidget->setItem(0,0, new QTableWidgetItem(szBuff));
 
         memset(szBuff, '\0', sizeof(szBuff)); // Clear buffer
-        CloseHandle(hSerial); // Close handle
 
     }
-    //}
+
+    //CloseHandle(hSerial); // Close handle
+
     return 0;
 
 
     CloseHandle(hSerial); // Close handle
+    thread->quit();
+    });
+    thread->start();
 }
 
 

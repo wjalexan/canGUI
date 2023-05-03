@@ -4,13 +4,14 @@
 // #include "checkChar.h"
 
 #include <QSizePolicy>
+#include <QThread>
 #include <iostream>
 #include <Windows.h>
 #include <string>
 
 
 
-bool playing =false;
+//bool playing =false;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -20,6 +21,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableWidget->verticalHeader()->setVisible(false);// removes default number column4
     ui->pauseButton->setText("Start Recording");
     ui->label->setText("Not Connected");
+
+
 
 }
 
@@ -36,7 +39,11 @@ void MainWindow::on_connectButton_clicked()
     QString pt = ui->portSelect->text();
     LPCWSTR port = reinterpret_cast<LPCWSTR>(pt.constData()); // convert QString input to lpwstr requirement
     serialSetup(port);
-
+    QThread *thread = QThread::create([&]{
+        while(playing == true)
+            ui->connectButton->setText("d");
+    });
+    thread->start();
 }
 
 
