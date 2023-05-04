@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <windows.h>
 #include <QThread>
+#include "workerThread.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -37,20 +38,13 @@ private:
 
     int IDlen(std::string can, int start);
 
+    workerThread * readLoop;
+
     //workerThread *thread_;
 
 };
 
 
 
-class workerThread : public QThread {
-    Q_OBJECT
-
-public:
-    explicit workerThread(QMainWindow *parent = nullptr);
-    void run() override;
-private:
-    QMainWindow *mainWindow;
-};
 
 #endif // MAINWINDOW_H

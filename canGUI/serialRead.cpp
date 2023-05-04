@@ -6,6 +6,7 @@
 #include <QThread>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "workerThread.h"
 
 
 

@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-// #include "serialRead.h"
-// #include "checkChar.h"
+#include "workerThread.h"
 
 #include <QSizePolicy>
 #include <QThread>
@@ -21,9 +20,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->tableWidget->verticalHeader()->setVisible(false);// removes default number column4
     ui->pauseButton->setText("Start Recording");
     ui->label->setText("Not Connected");
-
-
-
 }
 
 MainWindow::~MainWindow()
@@ -39,8 +35,7 @@ void MainWindow::on_connectButton_clicked()
     QString pt = ui->portSelect->text();
     LPCWSTR port = reinterpret_cast<LPCWSTR>(pt.constData()); // convert QString input to lpwstr requirement
     serialSetup(port);
-    thread1 = new workerThread(this);
-    thread->start();
+    readLoop = new workerThread(this);
     /*QThread *thread = QThread::create([&]{
         while(playing == true)
             ui->connectButton->setText("d");
