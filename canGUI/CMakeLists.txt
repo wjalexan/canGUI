@@ -16,6 +16,7 @@ set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
+        workerThread.h
         mainwindow.ui
         serialRead.cpp
         checkType.cpp

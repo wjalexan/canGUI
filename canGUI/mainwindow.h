@@ -37,7 +37,7 @@ private:
 
     int IDlen(std::string can, int start);
 
-    //worker *thread_;
+    //workerThread *thread_;
 
 };
 

@@ -39,7 +39,8 @@ void MainWindow::on_connectButton_clicked()
     QString pt = ui->portSelect->text();
     LPCWSTR port = reinterpret_cast<LPCWSTR>(pt.constData()); // convert QString input to lpwstr requirement
     serialSetup(port);
-
+    thread1 = new workerThread(this);
+    thread->start();
     /*QThread *thread = QThread::create([&]{
         while(playing == true)
             ui->connectButton->setText("d");
