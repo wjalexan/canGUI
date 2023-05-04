@@ -8,7 +8,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <string>
-
+#include <unistd.h>
 
 
 //bool playing =false;
@@ -39,11 +39,15 @@ void MainWindow::on_connectButton_clicked()
     QString pt = ui->portSelect->text();
     LPCWSTR port = reinterpret_cast<LPCWSTR>(pt.constData()); // convert QString input to lpwstr requirement
     serialSetup(port);
-    QThread *thread = QThread::create([&]{
+
+    /*QThread *thread = QThread::create([&]{
         while(playing == true)
             ui->connectButton->setText("d");
+            usleep(1000000);
+            ui->connectButton->setText(" ");
+            usleep(1000000);
     });
-    thread->start();
+    thread->start();*/
 }
 
 
@@ -68,3 +72,4 @@ void MainWindow::on_pauseButton_clicked()
     }
 }
 
+workerThread::workerThread(QMainWindow *parent) : mainWindow(parent) {}

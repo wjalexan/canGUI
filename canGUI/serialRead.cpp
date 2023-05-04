@@ -12,9 +12,9 @@
 
 int MainWindow::serialRead(LPCWSTR port) {
     playing = false;
-    QThread *thread = QThread::create([&]{
-        while(playing == false)
-            ui->connectButton->setText("test");
+    //QThread *thread = QThread::create([&]{
+    //    while(playing == false)
+    //        ui->connectButton->setText("test");
     // Define variables
     // HANDLE hSerial; // Handle for serial port
     DCB dcbSerialParams = { 0 }; // Structure for serial port parameters
@@ -155,15 +155,14 @@ int MainWindow::serialRead(LPCWSTR port) {
 
     }
 
-    //CloseHandle(hSerial); // Close handle
+    CloseHandle(hSerial); // Close handle
 
     return 0;
 
 
-    CloseHandle(hSerial); // Close handle
-    thread->quit();
-    });
-    thread->start();
+    //thread->quit();
+    //});
+    //thread->start();
 }
 
 
@@ -235,8 +234,19 @@ int MainWindow::serialSetup(LPCWSTR port){
         memset(szBuff, '\0', sizeof(szBuff)); // Clear buffer
         CloseHandle(hSerial); // Close handle
     }
-    return 0;
-
 
     CloseHandle(hSerial); // Close handle
+    return 0;
+}
+
+
+
+void workerThread::run(){
+    /*while(playing == true){
+        using namespace Ui;
+        MainWindow->ui->connectButton->setText("d");
+        usleep(1000000);
+        ui->connectButton->setText(" ");
+        usleep(1000000);
+    }*/
 }
