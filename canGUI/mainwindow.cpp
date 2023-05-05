@@ -36,7 +36,6 @@ void MainWindow::on_connectButton_clicked()
     QString pt = ui->portSelect->text();
     LPCWSTR port = reinterpret_cast<LPCWSTR>(pt.constData()); // convert QString input to lpwstr requirement
     serialSetup(port);
-    //readLoop = new workerThread(this);
     /*QThread *thread = QThread::create([&]{
         while(playing == true)
             ui->connectButton->setText("d");
@@ -69,4 +68,11 @@ void MainWindow::on_pauseButton_clicked()
     }
 }
 
-//workerThread::workerThread(QMainWindow *parent) : mainWindow(parent) {}
+
+
+void loopThread::run(){ // defining run() function when loopThread is called
+    while(!running){
+
+    }
+}
+

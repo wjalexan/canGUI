@@ -44,15 +44,25 @@ private:
 };
 
 
-class workerThread : public QThread {
+class loopThread : public QThread { // definition of loopThread used to run the infinite loop, getting the data to dismplay on screen
     Q_OBJECT
 
+signals:
+    void canBufferAvailable(char szBuff[255]);
+
+
 public:
-    workerThread(MainWindow* mainWindow, QObject* parent = nullptr) :
-        QThread(parent), m_mainWindow(mainWindow) {}
+    void stop(){
+        running = false;
+    }
+
+    loopThread(QObject *parent = nullptr) : QThread(parent) {}
+
+protected:
     void run() override;
+
 private:
-    QMainWindow *m_mainWindow;
+    bool running;
 };
 
 #endif // MAINWINDOW_H
