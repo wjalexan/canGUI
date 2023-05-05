@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "workerThread.h"
+//#include "workerThread.h"
 
 #include <QSizePolicy>
 #include <QThread>
@@ -28,6 +28,7 @@ MainWindow::~MainWindow()
 }
 
 
+
 void MainWindow::on_connectButton_clicked()
 {
     ui->label->setText("Connecting...");
@@ -35,7 +36,7 @@ void MainWindow::on_connectButton_clicked()
     QString pt = ui->portSelect->text();
     LPCWSTR port = reinterpret_cast<LPCWSTR>(pt.constData()); // convert QString input to lpwstr requirement
     serialSetup(port);
-    readLoop = new workerThread(this);
+    //readLoop = new workerThread(this);
     /*QThread *thread = QThread::create([&]{
         while(playing == true)
             ui->connectButton->setText("d");
@@ -68,4 +69,4 @@ void MainWindow::on_pauseButton_clicked()
     }
 }
 
-workerThread::workerThread(QMainWindow *parent) : mainWindow(parent) {}
+//workerThread::workerThread(QMainWindow *parent) : mainWindow(parent) {}

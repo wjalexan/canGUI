@@ -1,10 +1,11 @@
+#pragma once
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
 #include <windows.h>
 #include <QThread>
-#include "workerThread.h"
+//#include "workerThread.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -38,13 +39,20 @@ private:
 
     int IDlen(std::string can, int start);
 
-    workerThread * readLoop;
-
-    //workerThread *thread_;
+    //workerThread* readLoop;
 
 };
 
 
+class workerThread : public QThread {
+    Q_OBJECT
 
+public:
+    workerThread(MainWindow* mainWindow, QObject* parent = nullptr) :
+        QThread(parent), m_mainWindow(mainWindow) {}
+    void run() override;
+private:
+    QMainWindow *m_mainWindow;
+};
 
 #endif // MAINWINDOW_H
