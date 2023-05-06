@@ -8,6 +8,8 @@
 #include <Windows.h>
 #include <string>
 #include <unistd.h>
+#include <sstream>
+#include <iomanip>
 
 
 //bool playing =false;
@@ -70,9 +72,145 @@ void MainWindow::on_pauseButton_clicked()
 
 
 
-void loopThread::run(){ // defining run() function when loopThread is called
-    while(!running){
 
+
+
+
+void loopThread::run(LPCWSTR port){ // defining run() function when loopThread is called
+
+    playing = true;
+    DCB dcbSerialParams = { 0 }; // Structure for serial port parameters
+    DWORD dwBytesRead = 0; // Number of bytes read from serial port
+    char szBuff[256] = { 0 }; // Buffer for data from serial port
+
+    // Open serial port
+    HANDLE hSerial = CreateFile((port), GENERIC_READ | GENERIC_WRITE,
+                                0,
+                                NULL,
+                                OPEN_EXISTING,
+                                0,
+                                NULL);
+
+    if (hSerial == INVALID_HANDLE_VALUE)
+    {
+        //ui->label->setText("Error opening serial port");
+        //return 1;
+    }
+
+    // Set serial port parameters
+    dcbSerialParams.DCBlength = sizeof(dcbSerialParams);
+
+    if (!GetCommState(hSerial, &dcbSerialParams))
+    {
+        //ui->label->setText("Error getting serial port state");
+        //return 1;
+    }
+
+    dcbSerialParams.BaudRate = CBR_9600; // Baud rate
+    dcbSerialParams.ByteSize = 8; // Data size
+    dcbSerialParams.StopBits = ONESTOPBIT; // Stop bit
+    dcbSerialParams.Parity = NOPARITY; // Parity
+
+    if (!SetCommState(hSerial, &dcbSerialParams))
+    {
+        //ui->label->setText("Error getting serial port state");
+        //return 1;
+    }
+    while(1){
+        if (playing == false) {
+            break;
+        }
+        // Read data from serial port
+        if (!ReadFile(hSerial, szBuff, sizeof(szBuff) - 1, &dwBytesRead, NULL))
+        {
+            //ui->label->setText("Error reading from serial port");
+            break;
+        }
+
+
+        if (dwBytesRead > 0)
+        {
+            szBuff[dwBytesRead] = '\0'; // Add null terminator
+
+            emit canBufferAvailable(szBuff); // signal calling function to interpret serial messages
+
+            memset(szBuff, '\0', sizeof(szBuff)); // Clear buffer
+
+        }
+
+        CloseHandle(hSerial); // Close handle
     }
 }
 
+
+
+
+void MainWindow::canInterpret(char buffer[256]) { // function for decoding CAN message buffer
+
+    int position; // variable storing the current position when decoding CAN messages
+    int end = findEnd(buffer); // variable indicating the last complete packet
+
+    for (int x = 0; x < end - 1; x++) {
+        for (int i = 0 + x; i < 255; i++) {
+            if (checkChar(buffer[i]) == 'b') {
+                std::string id; // packet id
+                std::string rtr; // remote transmission request: denotes whether data is requested
+                std::string ide; // denotes whether an extension is being transmitted
+                std::string dlc; // dlc denotes no. of bytes in data section
+                std::string data[8]; // data bits
+                int dataPos; // position of data bits in array
+                int dataLen; // length of data (dlc)
+
+
+                ui->tableWidget->insertRow(0); // new row in table
+
+                if (IDlen(buffer, i) != -1) {
+
+                    for (int j = 1; j < IDlen(buffer, i); j++) {
+                        id += buffer[j + i]; // set 'id' variable to packet id
+                    }
+
+                    for (int j = 0; j < 2; j++) {
+                        rtr += buffer[j + i + IDlen(buffer, i) + 1]; // set 'rtr' variable to packet rtr
+                        ide += buffer[j + i + IDlen(buffer, i) + 4]; // set 'ide' variable to packet ide
+                    }
+
+                    dataPos = i + IDlen(buffer, i) + 7;
+                    //ui->label->setText(QString::number(i+IDlen(buffer,i)));
+                    //data = buffer[dataPos];
+                    for (int j = 0; j < 16; j++) {
+                        if (checkChar(buffer[dataPos + j]) == 'f') {
+                            dataLen = j;
+                            break;
+                        }
+                    }
+
+
+                    for (int j = 0; j < dataLen / 2; j++) {
+                        for (int k = 0; k < 2; k++) {
+                            data[j] += buffer[2 * j + dataPos + k]; // set 'id' variable to packet id
+                        }
+                    }
+
+                    // convert length integer value to hexadecimal before adding to table
+                    std::stringstream len;
+                    len << std::hex << std::uppercase << std::setfill('0') << std::setw(2) << dataLen / 2;
+                    dlc = len.str();
+
+
+                    ui->tableWidget->setItem(0, 0, new QTableWidgetItem(id.c_str())); // print id in table
+                    ui->tableWidget->setItem(0, 1, new QTableWidgetItem(rtr.c_str())); // print rtr in table
+                    ui->tableWidget->setItem(0, 2, new QTableWidgetItem(ide.c_str())); // print ide in table
+                    ui->tableWidget->setItem(0, 3, new QTableWidgetItem(dlc.c_str())); // print dlc in table
+                    for (int j = 0; j < dataLen / 2; j++) {
+                        ui->tableWidget->setItem(0, 4 + j, new QTableWidgetItem(data[j].c_str())); // print data in table
+                    }
+
+                    position = dataLen + dataPos;
+                    break;
+                }
+            }
+        }
+        x = position;
+    }
+}
