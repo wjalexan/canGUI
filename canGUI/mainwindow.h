@@ -5,10 +5,12 @@
 #include <QMainWindow>
 #include <windows.h>
 #include <QThread>
+
+//#include "checkAlgorithms.h"
 //#include "workerThread.h"
 
 
-bool playing = false;
+
 
 
 
@@ -33,8 +35,9 @@ private slots:
 
     void on_pauseButton_clicked();
 
-    void canInterpret(char buffer[256]);
+public slots:
 
+    void canInterpret(std::string strBuffer);
 
 private:
     Ui::MainWindow *ui;
@@ -43,13 +46,11 @@ private:
 
     int serialSetup(LPCWSTR port);
 
-    //char checkChar(char inpt);
+    char checkChar(char inpt);
 
-    //int findEnd(char data[256]);
+    int findEnd(char data[256]);
 
-    //int IDlen(std::string can, int start);
-
-    //workerThread* readLoop;
+    int IDlen(std::string can, int start);
 
 };
 
@@ -62,74 +63,22 @@ class loopThread : public QThread { // definition of loopThread used to run the 
     Q_OBJECT
 
 signals:
-    void canBufferAvailable(char canBuffer[256]);
+    void canBufferAvailable(std::string buffer);
 
 
 public:
     void stop(){
-        playing = false;
+        quit();
     }
 
     loopThread(QObject *parent = nullptr) : QThread(parent) {}
 
 protected:
-    void run(LPCWSTR port);
+    void run() override;
 
 private:
 
 };
-
-
-
-
-
-// other function definitions:
-
-char checkChar(char inpt){
-    switch (inpt){
-    case '^':
-        return 'b'; // searches for starting character
-        break;
-
-    case '*':
-        return 'f'; // searces for termination character
-        break;
-
-    case ',':
-        return 's'; // searches for separation character
-        break;
-
-    default:
-        if ((int(inpt) >= 64 && int(inpt) <= 90) || (int(inpt) >= 48 && int(inpt) <= 57)) {
-            return 'v'; // searches for valid data bit
-        }
-        else {
-            return 'n';
-        }
-    }
-}
-
-int IDlen(std::string can, int start){
-    for (int i = 1; i < 255-start; i++){
-        if (checkChar(can[start + i]) == 's'){
-            return i;
-            break;
-        }
-    }
-    return -1;
-}
-
-
-int findEnd(char data[255]){
-    for (int j = 255; j > 0; j--){
-        if (checkChar(data[j]) == 'f'){
-            return j;
-            break;
-        }
-    }
-}
-
-
 
 
 #endif // MAINWINDOW_H

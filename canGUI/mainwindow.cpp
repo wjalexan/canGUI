@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 //#include "workerThread.h"
+//#include "checkAlgorithms.h"
 
 #include <QSizePolicy>
 #include <QThread>
@@ -12,7 +13,9 @@
 #include <iomanip>
 
 
-//bool playing =false;
+bool playing = false;
+LPCWSTR port;
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -65,8 +68,12 @@ void MainWindow::on_pauseButton_clicked()
         playing = true;
         QString pt = ui->portSelect->text();
 
-        LPCWSTR port = reinterpret_cast<LPCWSTR>(pt.constData()); // convert QString input to lpwstr requirement
-        serialRead(port);
+        port = reinterpret_cast<LPCWSTR>(pt.constData()); // convert QString input to lpwstr requirement
+//        serialRead(port);
+        loopThread *thread = new loopThread(this);
+//        connect(thread, &loopThread::canBufferAvailable, this, &MainWindow::canInterpret);
+        connect(thread, SIGNAL(canBufferAvailable(std::string)), this, SLOT(canInterpret(std::string)));
+        thread->start();
     }
 }
 
@@ -76,7 +83,7 @@ void MainWindow::on_pauseButton_clicked()
 
 
 
-void loopThread::run(LPCWSTR port){ // defining run() function when loopThread is called
+void loopThread::run(){ // defining run() function when loopThread is called
 
     playing = true;
     DCB dcbSerialParams = { 0 }; // Structure for serial port parameters
@@ -95,6 +102,7 @@ void loopThread::run(LPCWSTR port){ // defining run() function when loopThread i
     {
         //ui->label->setText("Error opening serial port");
         //return 1;
+        stop();
     }
 
     // Set serial port parameters
@@ -130,36 +138,52 @@ void loopThread::run(LPCWSTR port){ // defining run() function when loopThread i
 
         if (dwBytesRead > 0)
         {
-            szBuff[dwBytesRead] = '\0'; // Add null terminator
 
-            emit canBufferAvailable(szBuff); // signal calling function to interpret serial messages
+            std::string stringBuff; // convert szBuff variable to std::string so it can be passed through slot
+            szBuff[dwBytesRead] = '\0'; // Add null terminator
+            for (int i = 0; i < 256; i++) {
+                stringBuff += szBuff[i];
+            }
+
+//            stringBuff = "jfkasdhflaskdjfksldajflksdjaflksdajflksdajfl";
+
+            emit canBufferAvailable(stringBuff); // signal calling function to interpret serial messages
+
 
             memset(szBuff, '\0', sizeof(szBuff)); // Clear buffer
 
         }
+//        break;
 
-        CloseHandle(hSerial); // Close handle
     }
+    CloseHandle(hSerial); // Close handle
 }
 
 
 
 
-void MainWindow::canInterpret(char buffer[256]) { // function for decoding CAN message buffer
+void MainWindow::canInterpret(std::string strBuffer) { // function for decoding CAN message buffer
 
-    int position; // variable storing the current position when decoding CAN messages
+    char buffer[256] = { 0 }; // initialize buffer variable as a character
+    for (int i = 0; i < 256; i++){
+        buffer[i] = strBuffer[i]; // populate buffer variable with contents of string
+    }
+
+    int position = 0; // variable storing the current position when decoding CAN messages
     int end = findEnd(buffer); // variable indicating the last complete packet
 
+
+
     for (int x = 0; x < end - 1; x++) {
-        for (int i = 0 + x; i < 255; i++) {
+        for (int i = 0 + x; i < 256; i++) {
             if (checkChar(buffer[i]) == 'b') {
-                std::string id; // packet id
-                std::string rtr; // remote transmission request: denotes whether data is requested
-                std::string ide; // denotes whether an extension is being transmitted
-                std::string dlc; // dlc denotes no. of bytes in data section
+                std::string id = ""; // packet id
+                std::string rtr = ""; // remote transmission request: denotes whether data is requested
+                std::string ide = ""; // denotes whether an extension is being transmitted
+                std::string dlc = ""; // dlc denotes no. of bytes in data section
                 std::string data[8]; // data bits
-                int dataPos; // position of data bits in array
-                int dataLen; // length of data (dlc)
+                int dataPos = 0; // position of data bits in array
+                int dataLen = 0; // length of data (dlc)
 
 
                 ui->tableWidget->insertRow(0); // new row in table
@@ -176,10 +200,8 @@ void MainWindow::canInterpret(char buffer[256]) { // function for decoding CAN m
                     }
 
                     dataPos = i + IDlen(buffer, i) + 7;
-                    //ui->label->setText(QString::number(i+IDlen(buffer,i)));
-                    //data = buffer[dataPos];
                     for (int j = 0; j < 16; j++) {
-                        if (checkChar(buffer[dataPos + j]) == 'f') {
+                        if (checkChar(buffer[dataPos + j]) == 'f') { // finding position of data - for loop iterates until it finds the end character
                             dataLen = j;
                             break;
                         }
@@ -187,7 +209,7 @@ void MainWindow::canInterpret(char buffer[256]) { // function for decoding CAN m
 
 
                     for (int j = 0; j < dataLen / 2; j++) {
-                        for (int k = 0; k < 2; k++) {
+                        for (int k = 0; k < 2; k++) { // finding position of packet ID using iterative for loop
                             data[j] += buffer[2 * j + dataPos + k]; // set 'id' variable to packet id
                         }
                     }
@@ -213,4 +235,5 @@ void MainWindow::canInterpret(char buffer[256]) { // function for decoding CAN m
         }
         x = position;
     }
+//    playing = false;
 }

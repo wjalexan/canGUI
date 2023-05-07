@@ -19,7 +19,8 @@ set(PROJECT_SOURCES
         # workerThread.h
         mainwindow.ui
         serialRead.cpp
-        checkType.cpp
+        # checkType.cpp
+        # checkAlgorithms.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
